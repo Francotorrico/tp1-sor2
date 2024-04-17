@@ -48,7 +48,7 @@ int main() {
     fread(pt, sizeof(PartitionTable), 4, in); // leo entradas 
     
     for(i=0; i<4; i++) {        
-        printf("Partiion type: %d\n", pt[i].partition_type);
+        printf("Partition type: %d\n", pt[i].partition_type);
         if(pt[i].partition_type == 1) {
             printf("Encontrado FAT12 %d\n", i);
             break;
@@ -65,28 +65,28 @@ int main() {
     
     printf("  Jump code: %02X:%02X:%02X\n", bs.jmp[0], bs.jmp[1], bs.jmp[2]);
     printf("  OEM code: [%.8s]\n", bs.oem);
-    printf("  sector_size: %d\n", bs.sector_size);
+    printf("  Bytes per sector: %d\n", bs.sector_size);
 	// {...} COMPLETAR
-	printf("  cluster_size: %d\n", bs.cluster_size);
-	printf("  reserved_sectors: %d\n", bs.reserved_sectors);
-	printf("  num_fats: %d\n", bs.num_fats);
-	printf("  num_root_entries: %d\n", bs.num_root_entries);
-	printf("  num_sectors: %d\n", bs.num_sectors);
-	printf("  media_type: %d\n", bs.media_type);
-	printf("  fat_size_sectors: %d\n", bs.fat_size_sectors);
-	printf("  sectors_per_track: %d\n", bs.sectors_per_track);
-	printf("  num_heads: %d\n", bs.num_heads);
-	printf("  hidden_sectors: %d\n", bs.hidden_sectors);
-	printf("  total_sectors: %d\n", bs.total_sectors);
-	printf("  drive_number: %d\n", bs.drive_number);
+	printf("  Sector per cluster (cluster_size): %d\n", bs.cluster_size);
+	printf("  Size of reserved area, in sectors(number_of_reserved_sectors): %d\n", bs.reserved_sectors);
+	printf("  Number of fats: %d\n", bs.num_fats);
+	printf("  Maximun number of files in the root directory (number_of_root_entries): %d\n", bs.num_root_entries);
+	printf("  Number of sectors in the file system: %d\n", bs.num_sectors);
+	printf("  Media type: %d\n", bs.media_type);
+	printf("  Size of each FAT, in sector (fat_size_sectors): %d\n", bs.fat_size_sectors);
+	printf("  Sector per track in storage device(sectors_per_track): %d\n", bs.sectors_per_track);
+	printf("  Number of heads in storage device (num_heads): %d\n", bs.num_heads);
+	printf("  Number of serctors before the star partition (hidden_sectors): %d\n", bs.hidden_sectors);
+	printf("  Number of the sectors in the file system (total_sectors): %d\n", bs.total_sectors);
+	printf("  line-36 drive_number: %d\n", bs.drive_number);
 	printf("  current_head: %d\n", bs.current_head);
 	printf("  signature: %d\n", bs.signature);
 
 	//
-    printf("  volume_id: 0x%08X\n", bs.volume_id);
+    printf("  volumen serial number (volume_id): 0x%08X\n", bs.volume_id);
     printf("  Volume label: [%.11s]\n", bs.volume_label);
     printf("  Filesystem type: [%.8s]\n", bs.fs_type);
-    printf("  Boot sector signature: 0x%04X\n", bs.boot_sector_signature);
+    printf("  Signature value (Boot sector signature): 0x%04X\n", bs.boot_sector_signature);
     
     fclose(in);
     return 0;
