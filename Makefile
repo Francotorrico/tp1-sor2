@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-SRC = read_boot.c read_mbr.c read_root.c lecturaRoot.c 
+SRC = read_boot.c read_mbr.c read_root.c lecturaRoot.c recoverFile.c
 BIN = $(SRC:.c=)
 
 clean:
@@ -11,3 +11,4 @@ all:
 	gcc read_mbr.c -o  read_mbr
 	gcc read_root.c -o read_root
 	gcc lecturaRoot.c -o lecturaRoot
+	gcc recoverFile.c -o recoverFile
