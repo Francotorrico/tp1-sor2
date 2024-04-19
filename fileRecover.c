@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     unsigned char first_byte;
@@ -36,10 +37,8 @@ typedef struct {
 } __attribute((packed)) Fat12BootSector;
 
 typedef struct {
-	unsigned char filename[1];
-    unsigned char nombre[7];
-    unsigned char extension[3];
-    unsigned char atributos[1];
+    unsigned char filename[11];
+    unsigned char atributos;
     unsigned char reserved;
     unsigned char created_time_seconds;
     unsigned char created_time_hours_minutes_seconds[2];
@@ -52,47 +51,55 @@ typedef struct {
     unsigned int size_of_file;
 } __attribute((packed)) Fat12Entry;
 
-void recoverFileContent(unsigned short pointer){
-	FILE *file = fopen("test.img", "r+");
-	char letra[1]="B";
-	fseek(file, pointer, SEEK_SET);
-	fwrite(letra, sizeof(char), sizeof(letra), file);
-	printf("archivo restaurado\n");
-	
-	fclose(file);
+void print_file(Fat12Entry *entry, FILE *in, char *parametro){
+	switch((entry->filename[0])) {
+	case 0x00:
+		return;
+	case 0xE5:
+		if((strstr(entry->filename, parametro) != NULL)) {
+			printf("Recuperando archivo: [?%.7s.%.3s]\n", &entry->filename[1], &entry->filename[8]);
+			unsigned char letra = 'B';
+			unsigned int posicionInicial = ftell(in);
+			unsigned int posicionPrimerByte = posicionInicial - 32;
+			
+			fseek(in, posicionPrimerByte, SEEK_SET);
+			fwrite(letra, sizeof(entry->filename[0]), 1, in);
+			fflush(in);
+			fseek(in, posicionInicial, SEEK_SET);
+			
+			printf("Archivo recuperado: [?%.7s.%.3s]\n", &entry->filename[1], &entry->filename[8]);
+			break;
+		}	
+		else {
+			printf("El archivo [?%.7s.%.3s] no contiene el string %s\n", &entry->filename[1], &entry->filename[0], parametro);
+		}
+	case 0x05:
+		return;
+	case 0x2E:
+		return;
+	default:
+		if(entry->atributos == 0x10){
+			return;
+		}
+	}
 }
 
-void printDeletedFiles(Fat12Entry *entry, unsigned short pointer)
-{
-    if ((entry->filename[0] == 0xE5) ) {
-        if (entry->atributos[0] == 0x20){
-            recoverFileContent(pointer);
-        }
+int main(int argc, char** argv){
+   
+    int length = 0;
+    if(argc > 1 && argv[1] != NULL) {
+    	length = strlen(argv[1]);
     }
-}
+    
+    char parametro[length];
+    printf("Ingrese el nombre del archivo a recuperar: ");
+    scanf("%s", parametro);
+     
 
-int main(){
     FILE *in = fopen("test.img", "rb");
-    int i;
     PartitionTable pt[4];
     Fat12BootSector bs;
     Fat12Entry entry;
-    unsigned short pointer_recovery;
-
-	fseek(in, 0x1BE, SEEK_SET); //donde comienza la tabla de particiones 
-    fread(pt, sizeof(PartitionTable), 4, in);//leo las entradas
-    
-    for(i=0; i<4; i++) {        
-        if(pt[i].partition_type == 1) {
-            printf("Encontrada particion FAT12 %d\n", i);
-            break;
-        }
-    }
-    
-    if(i == 4) {
-        printf("No encontrado filesystem FAT12, saliendo...\n");
-        return -1;
-    }
     
     fseek(in, 0, SEEK_SET);
     fread(&bs, sizeof(Fat12BootSector), 1, in);
@@ -105,12 +112,13 @@ int main(){
           bs.sector_size, SEEK_CUR);
     
     printf("Root dir_entries %d \n", bs.root_dir_entries);
-    for(i=0; i<bs.root_dir_entries; i++) {
-    	pointer_recovery = ftell(in);
-        fread(&entry, sizeof(entry), 1, in);
-        printDeletedFiles(&entry, pointer_recovery);
-    }
     
+    
+    for(int i=0; i<bs.root_dir_entries; i++) {
+        fread(&entry, sizeof(entry), 1, in);
+         print_file(&entry, in, parametro);
+    }
+   
     printf("\nLeido Root directory, ahora en 0x%lX\n", ftell(in));
     fclose(in);
     return 0;
