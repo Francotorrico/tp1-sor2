@@ -63,11 +63,12 @@ void print_file(Fat12Entry *entry, FILE *in, char *parametro){
 			unsigned int posicionPrimerByte = posicionInicial - 32;
 			
 			fseek(in, posicionPrimerByte, SEEK_SET);
-			fwrite(letra, sizeof(entry->filename[0]), 1, in);
+			if(fwrite(&letra, sizeof(letra), 1, in) != 1) {
+				printf(stderr,"Error al escribir el archivo");
+			}
 			fflush(in);
 			fseek(in, posicionInicial, SEEK_SET);
-			
-			printf("Archivo recuperado: [?%.7s.%.3s]\n", &entry->filename[1], &entry->filename[8]);
+		
 			break;
 		}	
 		else {
@@ -96,7 +97,7 @@ int main(int argc, char** argv){
     scanf("%s", parametro);
      
 
-    FILE *in = fopen("test.img", "rb");
+    FILE *in = fopen("test.img", "rb+");
     PartitionTable pt[4];
     Fat12BootSector bs;
     Fat12Entry entry;
